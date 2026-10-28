@@ -1,17 +1,6 @@
+
 pipeline {
     agent any
-
-   stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('sonarqube-server') {
-            script {
-                def scannerHome = tool name: 'SonarScanner',
-                    type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                sh "${scannerHome}/bin/sonar-scanner"
-            }
-        }
-    }
-}
 
     stages {
         stage('Checkout') {
@@ -40,7 +29,13 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonarqube-server') {
-                    sh 'sonar-scanner'
+                    script {
+                        def scannerHome = tool(
+                            name: 'SonarScanner',
+                            type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                        )
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
         }
