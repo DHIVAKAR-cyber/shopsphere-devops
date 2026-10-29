@@ -69,5 +69,31 @@ pipeline {
                 '''
             }
         }
+    
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKERHUB_USER',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    sh '''
+                        set -e
+
+                        IMAGE="$DOCKERHUB_USER/shopsphere-product"
+
+                        echo "$DOCKERHUB_TOKEN" | docker login \
+                            --username "$DOCKERHUB_USER" \
+                            --password-stdin
+
+                        docker tag shopsphere-product:latest "$IMAGE:latest"
+                        docker push "$IMAGE:latest"
+
+                        docker logout
+                    '''
+                }
+            }
+        }
     }
-}
+}    
