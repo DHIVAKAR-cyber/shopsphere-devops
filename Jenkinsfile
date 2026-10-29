@@ -42,3 +42,31 @@ pipeline {
         }
     }
 }
+        stage('Container Smoke Test') {
+            steps {
+                sh '''
+                    set -e
+
+                    docker rm -f shopsphere-smoke-test || true
+
+                    docker run -d \
+                        --name shopsphere-smoke-test \
+                        -p 5001:5000 \
+                        shopsphere-product:latest
+
+                    trap 'docker rm -f shopsphere-smoke-test >/dev/null 2>&1 || true' EXIT
+
+                    for i in $(seq 1 15); do
+                        if curl -fsS http://localhost:5001/health; then
+                            echo "Container smoke test passed"
+                            exit 0
+                        fi
+                        sleep 2
+                    done
+
+                    echo "Container smoke test failed"
+                    docker logs shopsphere-smoke-test
+                    exit 1
+                '''
+            }
+        }
