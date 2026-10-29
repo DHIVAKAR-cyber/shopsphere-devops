@@ -26,22 +26,21 @@ pipeline {
             }
         }
 
-      stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('sonarqube-server') {
-            sh 'which sonar-scanner'
-            sh 'sonar-scanner'
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube-server') {
+                    sh 'which sonar-scanner'
+                    sh 'sonar-scanner'
+                }
+            }
         }
-    }
-}
 
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t shopsphere-product:latest services/product-service'
             }
         }
-    }
-}
+
         stage('Container Smoke Test') {
             steps {
                 sh '''
@@ -70,3 +69,5 @@ pipeline {
                 '''
             }
         }
+    }
+}
