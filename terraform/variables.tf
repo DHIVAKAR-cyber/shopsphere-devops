@@ -21,3 +21,9 @@ variable "instance_type" {
   type        = string
   default     = "t3.micro"
 }
+
+variable "key_name" {
+  description = "AWS EC2 key pair name"
+  type        = string
+  default     = "shopsphere-key"
+}
