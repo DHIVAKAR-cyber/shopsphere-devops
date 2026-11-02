@@ -70,7 +70,6 @@ pipeline {
             }
         }
 
-
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
@@ -94,7 +93,7 @@ pipeline {
                     '''
                 }
             }
-
+        }
 
         stage('Deploy to EC2 using Ansible') {
             steps {
@@ -115,7 +114,19 @@ pipeline {
                 }
             }
         }
+    }
 
+    post {
+        success {
+            echo 'ShopSphere CI/CD pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'ShopSphere CI/CD pipeline failed. Check the console output.'
+        }
+
+        aborted {
+            echo 'ShopSphere pipeline was aborted.'
         }
     }
 }
