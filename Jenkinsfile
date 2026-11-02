@@ -69,7 +69,7 @@ pipeline {
                 '''
             }
         }
-    
+
 
         stage('Push to Docker Hub') {
             steps {
@@ -94,6 +94,28 @@ pipeline {
                     '''
                 }
             }
+
+
+        stage('Deploy to EC2 using Ansible') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'shopsphere-ec2-ssh',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    sh '''
+                        set -e
+
+                        ansible-playbook \
+                            -i ansible/inventory/hosts.ini \
+                            ansible/playbooks/deploy.yml \
+                            --private-key "$SSH_KEY" \
+                            -u "$SSH_USER"
+                    '''
+                }
+            }
+        }
+
         }
     }
-}    
+}
