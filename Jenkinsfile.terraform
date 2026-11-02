@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -39,10 +40,32 @@ pipeline {
                     variable: 'TF_VAR_ssh_allowed_cidr'
                 )]) {
                     dir('terraform') {
-                        sh 'terraform plan -input=false'
+                        sh '''
+                            terraform plan \
+                                -input=false \
+                                -out=shopsphere.tfplan
+
+                            terraform show -no-color shopsphere.tfplan
+                        '''
+
+                        archiveArtifacts(
+                            artifacts: 'shopsphere.tfplan',
+                            fingerprint: true
+                        )
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Terraform pipeline completed successfully.'
+            echo 'Saved Terraform plan as a Jenkins artifact.'
+        }
+
+        failure {
+            echo 'Terraform pipeline failed. Check the console output.'
         }
     }
 }
