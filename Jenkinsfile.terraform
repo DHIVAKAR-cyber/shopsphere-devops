@@ -56,16 +56,43 @@ pipeline {
                 }
             }
         }
+
+        stage('Manual Approval') {
+            steps {
+                script {
+                    input(
+                        message: 'Review the Terraform plan. Approve to continue?',
+                        ok: 'Approve Infrastructure Deployment'
+                    )
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                        terraform apply \
+                            -input=false \
+                            -auto-approve \
+                            shopsphere.tfplan
+                    '''
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Terraform pipeline completed successfully.'
-            echo 'Saved Terraform plan as a Jenkins artifact.'
+            echo 'Terraform infrastructure pipeline completed successfully.'
         }
 
         failure {
-            echo 'Terraform pipeline failed. Check the console output.'
+            echo 'Terraform infrastructure pipeline failed.'
+        }
+
+        aborted {
+            echo 'Terraform infrastructure pipeline was aborted.'
         }
     }
 }
