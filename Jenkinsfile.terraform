@@ -30,14 +30,18 @@ pipeline {
                     sh 'terraform validate'
                 }
             }
-        }stage('Terraform Plan') {
-             steps {
+        }
+
+        stage('Terraform Plan') {
+            steps {
                 withCredentials([string(
-                credentialsId: 'terraform-ssh-allowed-cidr',
-                variable: 'TF_VAR_ssh_allowed_cidr'
-        )]) {
-            dir('terraform') {
-                sh 'terraform plan -input=false'
+                    credentialsId: 'terraform-ssh-allowed-cidr',
+                    variable: 'TF_VAR_ssh_allowed_cidr'
+                )]) {
+                    dir('terraform') {
+                        sh 'terraform plan -input=false'
+                    }
+                }
             }
         }
     }
