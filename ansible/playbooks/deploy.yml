@@ -1,0 +1,20 @@
+---
+- name: Deploy ShopSphere Product Service
+  hosts: shopsphere
+  become: true
+
+  tasks:
+    - name: Pull ShopSphere Docker image
+      community.docker.docker_image:
+        name: dhivakarv1302/shopsphere-product
+        tag: latest
+        source: pull
+
+    - name: Run ShopSphere container
+      community.docker.docker_container:
+        name: shopsphere-product
+        image: dhivakarv1302/shopsphere-product:latest
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "5000:5000"
