@@ -6,3 +6,15 @@
 *.tfvars
 *.tfplan
 crash.log
+
+# Sensitive Kubernetes files
+shopsphere/templates/secret.yaml
+ansible/inventory/hosts.ini
+
+# Sensitive Kubernetes files
+shopsphere/templates/secret.yaml
+
+# Ansible inventory
+ansible/inventory/hosts.ini
+
+kubernetes/product-secret.yaml

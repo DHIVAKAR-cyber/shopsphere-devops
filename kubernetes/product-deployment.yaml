@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: shopsphere-product
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: shopsphere-product
+
+  template:
+    metadata:
+      labels:
+        app: shopsphere-product
+
+    spec:
+      containers:
+        - name: product-service
+          image: dhivakarv1302/shopsphere-product:latest
+
+          ports:
+            - containerPort: 5000
+
+          # CPU and Memory Management
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+          # Load ConfigMap and Secret
+          envFrom:
+            - configMapRef:
+                name: shopsphere-config
+            - secretRef:
+                name: shopsphere-secret
+
+          # Startup Probe
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            periodSeconds: 5
+            failureThreshold: 30
+
+          # Liveness Probe
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # Readiness Probe
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            periodSeconds: 5
+            failureThreshold: 3

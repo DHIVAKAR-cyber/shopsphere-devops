@@ -1,0 +1,23 @@
+replicaCount: 3
+
+image:
+  repository: dhivakarv1302/shopsphere-product
+  tag: latest
+  pullPolicy: IfNotPresent
+
+containerPort: 5000
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+configMapName: shopsphere-config
+secretName: shopsphere-secret
