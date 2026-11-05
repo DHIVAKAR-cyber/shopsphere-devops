@@ -1,3 +1,4 @@
+{{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 
@@ -10,8 +11,8 @@ spec:
     kind: Deployment
     name: {{ .Release.Name }}-product
 
-  minReplicas: 3
-  maxReplicas: 10
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
 
   metrics:
     - type: Resource
@@ -19,4 +20,5 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}

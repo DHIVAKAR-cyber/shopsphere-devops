@@ -1,5 +1,11 @@
 replicaCount: 3
 
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+
 image:
   repository: dhivakarv1302/shopsphere-product
   tag: latest

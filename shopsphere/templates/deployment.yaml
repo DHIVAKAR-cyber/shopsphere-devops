@@ -5,8 +5,9 @@ metadata:
   name: {{ .Release.Name }}-product
 
 spec:
+{{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-
+{{- end }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}-product
