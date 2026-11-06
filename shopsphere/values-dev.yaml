@@ -4,3 +4,6 @@ autoscaling:
   enabled: false
 
 appEnv: development
+
+image:
+  tag: v1.0.0
