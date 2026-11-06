@@ -7,3 +7,6 @@ autoscaling:
   targetCPUUtilizationPercentage: 60
 
 appEnv: staging
+
+image:
+  tag: v1.0.0
