@@ -6,4 +6,4 @@ autoscaling:
 appEnv: development
 
 image:
-  tag: v1.0.0
+  tag: v1.1.0
