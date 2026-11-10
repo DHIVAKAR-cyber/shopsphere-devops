@@ -7,3 +7,6 @@ autoscaling:
   targetCPUUtilizationPercentage: 50
 
 appEnv: production
+
+image:
+  tag: v1.0.0
