@@ -33,3 +33,13 @@ def get_product(product_id):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
+APP_VERSION = "1.1.0"
+
+
+@app.get("/version")
+def get_version():
+    return jsonify({
+        "application": "ShopSphere",
+        "version": APP_VERSION
+    }), 200

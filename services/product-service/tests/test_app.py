@@ -31,3 +31,13 @@ def test_get_missing_product():
 
     assert response.status_code == 404
     assert response.get_json() == {"error": "Product not found"}
+
+def test_get_version():
+    client = app.test_client()
+    response = client.get("/version")
+
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "application": "ShopSphere",
+        "version": "1.1.0"
+    }

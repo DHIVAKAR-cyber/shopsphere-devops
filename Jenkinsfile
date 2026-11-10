@@ -2,6 +2,10 @@
 pipeline {
     agent any
 
+    environment {
+        APP_VERSION = 'v1.1.0'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -37,7 +41,12 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t shopsphere-product:latest services/product-service'
+                sh '''
+                    docker build \
+                        -t shopsphere-product:${APP_VERSION} \
+                        -t shopsphere-product:latest \
+                        services/product-service
+                '''
             }
         }
 
@@ -51,21 +60,32 @@ pipeline {
                     docker run -d \
                         --name shopsphere-smoke-test \
                         -p 5001:5000 \
-                        shopsphere-product:latest
+                        shopsphere-product:${APP_VERSION}
 
                     trap 'docker rm -f shopsphere-smoke-test >/dev/null 2>&1 || true' EXIT
 
                     for i in $(seq 1 15); do
                         if curl -fsS http://localhost:5001/health; then
-                            echo "Container smoke test passed"
-                            exit 0
+                            echo "Health check passed"
+                            break
                         fi
+
+                        if [ "$i" -eq 15 ]; then
+                            echo "Container smoke test failed"
+                            docker logs shopsphere-smoke-test
+                            exit 1
+                        fi
+
                         sleep 2
                     done
 
-                    echo "Container smoke test failed"
-                    docker logs shopsphere-smoke-test
-                    exit 1
+                    VERSION_RESPONSE=$(curl -fsS http://localhost:5001/version)
+
+                    echo "Application version: $VERSION_RESPONSE"
+
+                    echo "$VERSION_RESPONSE" | grep -F '"version":"1.1.0"'
+
+                    echo "Version smoke test passed"
                 '''
             }
         }
@@ -86,30 +106,13 @@ pipeline {
                             --username "$DOCKERHUB_USER" \
                             --password-stdin
 
+                        docker tag shopsphere-product:${APP_VERSION} "$IMAGE:${APP_VERSION}"
                         docker tag shopsphere-product:latest "$IMAGE:latest"
+
+                        docker push "$IMAGE:${APP_VERSION}"
                         docker push "$IMAGE:latest"
 
                         docker logout
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to EC2 using Ansible') {
-            steps {
-                withCredentials([sshUserPrivateKey(
-                    credentialsId: 'shopsphere-ec2-ssh',
-                    keyFileVariable: 'SSH_KEY',
-                    usernameVariable: 'SSH_USER'
-                )]) {
-                    sh '''
-                        set -e
-
-                        ansible-playbook \
-                            -i ansible/inventory/hosts.ini \
-                            ansible/playbooks/deploy.yml \
-                            --private-key "$SSH_KEY" \
-                            -u "$SSH_USER"
                     '''
                 }
             }
@@ -118,15 +121,20 @@ pipeline {
 
     post {
         success {
-            echo 'ShopSphere CI/CD pipeline completed successfully!'
+            echo 'ShopSphere CI pipeline completed successfully!'
+            echo 'Docker image version: v1.1.0'
         }
 
         failure {
-            echo 'ShopSphere CI/CD pipeline failed. Check the console output.'
+            echo 'ShopSphere CI pipeline failed. Check the console output.'
         }
 
         aborted {
             echo 'ShopSphere pipeline was aborted.'
+        }
+
+        always {
+            sh 'docker rm -f shopsphere-smoke-test || true'
         }
     }
 }
