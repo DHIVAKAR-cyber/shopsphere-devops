@@ -1,0 +1,29 @@
+groups:
+  - name: shopsphere-alerts
+    rules:
+      - alert: ShopSphereDown
+        expr: up{job="shopsphere"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ShopSphere application is down"
+          description: "ShopSphere metrics endpoint is unreachable."
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "Ubuntu CPU usage is above 80%."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Ubuntu memory usage is above 85%."
